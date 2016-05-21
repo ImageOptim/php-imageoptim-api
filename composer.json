@@ -1,6 +1,8 @@
 {
     "name": "imageoptim/imageoptim",
     "description": "ImageOptim API for PHP",
+    "version": "1.0.1",
+    "minimum-stability": "stable",
     "license": "BSD-2-Clause",
     "authors": [
         {
