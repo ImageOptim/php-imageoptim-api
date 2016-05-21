@@ -24,7 +24,7 @@ require "vendor/autoload.php"; // created by Composer
 
 $api = new ImageOptim\API("🔶your api username goes here🔶");
 
-$imageData = $api->fromURL('http://example.com/photo.jpg') // read this image
+$imageData = $api->imageFromURL('http://example.com/photo.jpg') // read this image
     ->resize(160, 100, 'crop') // optional: resize to a thumbnail
     ->dpr(2) // optional: double number of pixels for high-resolution "Retina" displays
     ->getBytes(); // perform these operations and return the image data as binary string
@@ -40,7 +40,7 @@ file_put_contents("images/photo_optimized.jpg", $imageData);
 
 Creates new instance of the API. You need to give it [your username](https://im2.io/api/username).
 
-#### `fromURL($url)` — source image
+#### `imageFromURL($url)` — source image
 
 Creates new request that will read image from the given URL, and then resize and optimize it.
 
@@ -88,7 +88,7 @@ All methods throw on error. You can expect the following exception subclasses:
 
 * `ImageOptim\InvalidArgumentException` means arguments to functions are incorrect and you need to fix your code.
 * `ImageOptim\NetworkException` is thrown when there is problem comunicating with the API. You can retry the request.
-* `ImageOptim\NotFoundException` is thrown when URL given to `fromURL()` returns 404. Make sure paths and urlencoding are correct. [More](https://im2.io/api/post#response).
+* `ImageOptim\NotFoundException` is thrown when URL given to `imageFromURL()` returns 404. Make sure paths and urlencoding are correct. [More](https://im2.io/api/post#response).
 
 ### Help and info
 
