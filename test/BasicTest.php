@@ -54,7 +54,7 @@ class BasicTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testResizeWithoutHeight() {
-        $this->api->imageFromURL('http://example.com')->resize(320, "crop");
+        $this->api->imageFromURL('http://example.com')->resize(320, "fit");
     }
 
     public function testResizeWithHeight() {
@@ -69,9 +69,34 @@ class BasicTest extends PHPUnit_Framework_TestCase {
         $this->api->imageFromURL('http://example.com')->resize(320, 100, "loose");
     }
 
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Height
+     */
+    public function testCropNeedsHeight() {
+        $this->api->imageFromURL('http://example.com')->resize(320, null, "crop");
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Height
+     */
+    public function testPadNeedsHeight() {
+        $this->api->imageFromURL('http://example.com')->resize(320, null, "pad");
+    }
+
     public function testEncodesURLIfNeeded() {
         $example = 'http://example.com/%2F';
         $this->assertContains(rawurlencode($example), $this->api->imageFromURL($example)->apiURL());
+    }
+
+    public function testPad() {
+        $apiurl = $this->api->imageFromURL('http://example.com')->resize(10,15,'pad')->bgcolor('#FFffFF')->apiURL();
+
+        $this->assertInternalType('string', $apiurl);
+        $this->assertContains('10x15', $apiurl);
+        $this->assertContains('pad', $apiurl);
+        $this->assertContains('bgcolor=FFffFF', $apiurl);
     }
 
     public function testChains() {

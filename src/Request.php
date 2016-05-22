@@ -6,7 +6,7 @@ class Request {
     const BASE_URL = 'https://im2.io';
 
     private $username, $url;
-    private $width, $height, $dpr, $fit, $quality, $timeout;
+    private $width, $height, $dpr, $fit, $bgcolor, $quality, $timeout;
 
     function __construct($username, $url) {
         if (!$username) throw new InvalidArgumentException();
@@ -44,14 +44,19 @@ class Request {
             throw new InvalidArgumentException("Height is out of allowed range: $height");
         }
 
-        $allowedFitOptions = ['fit', 'crop', 'scale-down'];
+        $allowedFitOptions = ['fit', 'crop', 'scale-down', 'pad'];
         if (null !== $fit && !in_array($fit, $allowedFitOptions)) {
             throw new InvalidArgumentException("Fit is not one of ".implode(', ',$allowedFitOptions).". Got: $fit");
+        }
+
+        if (!$height && ('pad' === $fit || 'crop' === $fit)) {
+            throw new InvalidArgumentException("Height is required for '$fit' scaling mode\nPlease specify height or use 'fit' scaling mode to allow flexible height");
         }
 
         $this->width = $width;
         $this->height = $height;
         $this->fit = $fit;
+
 
         return $this;
     }
@@ -62,6 +67,17 @@ class Request {
         }
         $this->timeout = $timeout;
 
+        return $this;
+    }
+
+    public function bgcolor($background_color) {
+        if ('transparent' === $background_color || false === $background_color || null === $background_color) {
+            $this->bgcolor = null;
+        } else if (is_string($background_color) && preg_match('/^#?([0-9a-f]+)$/i', $background_color, $m)) {
+            $this->bgcolor = $m[1];
+        } else {
+            throw new InvalidArgumentException("Background color must be a hex string (e.g. AABBCC). Got: $background_color");
+        }
         return $this;
     }
 
@@ -104,6 +120,7 @@ class Request {
         if ($this->dpr) $options[] = $this->dpr;
         if ($this->quality) $options[] = 'quality=' . $this->quality;
         if ($this->timeout) $options[] = 'timeout=' . $this->timeout;
+        if ($this->bgcolor) $options[] = 'bgcolor=' . $this->bgcolor;
 
         return self::BASE_URL . '/' . rawurlencode($this->username) . '/' . implode(',', $options) . '/' . rawurlencode($this->url);
     }
