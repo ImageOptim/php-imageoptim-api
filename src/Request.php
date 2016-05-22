@@ -105,12 +105,7 @@ class Request {
         if ($this->quality) $options[] = 'quality=' . $this->quality;
         if ($this->timeout) $options[] = 'timeout=' . $this->timeout;
 
-        $imageURL = $this->url;
-        if (preg_match('/[\s%+]/', $imageURL)) {
-            $imageURL = rawurlencode($imageURL);
-        }
-
-        return self::BASE_URL . '/' . rawurlencode($this->username) . '/' . implode(',', $options) . '/' . $imageURL;
+        return self::BASE_URL . '/' . rawurlencode($this->username) . '/' . implode(',', $options) . '/' . rawurlencode($this->url);
     }
 
     function getBytes() {

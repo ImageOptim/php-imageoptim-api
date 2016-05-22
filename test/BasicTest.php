@@ -87,6 +87,6 @@ class BasicTest extends PHPUnit_Framework_TestCase {
         $this->assertContains('2x', $c2->apiURL());
         $this->assertContains('1280x300', $c1->apiURL());
         $this->assertContains('timeout=34', $c1->apiURL());
-        $this->assertContains('/http://example.com', $c1->apiURL());
+        $this->assertContains('/http%3A%2F%2Fexample.com', $c1->apiURL());
     }
 }
