@@ -131,7 +131,8 @@ class Request {
             'http' => [
                 'ignore_errors' => true,
                 'method' => 'POST',
-                'header' => "User-Agent: ImageOptim-php/1.0 PHP/" . phpversion(),
+                'header' => "Accept: image/*,application/im2+json\r\n" .
+                            "User-Agent: ImageOptim-php/1.0 PHP/" . phpversion(),
                 'timeout' => max(30, $this->timeout),
             ],
         ]));
@@ -167,18 +168,35 @@ class Request {
             throw new NetworkException("Unexpected response: ". $meta['wrapper_data'][0]);
         }
 
-        $code = intval($status[1]);
-        if ($code >= 500) {
-            throw new APIException($status[2], $code);
+        $status = intval($status[1]);
+        $errorMessage = $status[2];
+
+        if ($res && preg_grep('/content-type:\s*application\/im2\+json/i', $meta['wrapper_data'])) {
+            $json = @json_decode($res);
+            if ($json) {
+                if (isset($json->status)) {
+                    $status = $json->status;
+                }
+                if (isset($json->error)) {
+                    $errorMessage = $json->error;
+                }
+                if (isset($json->code) && $json->code === 'IM2ACCOUNT') {
+                    throw new AccessDeniedException($errorMessage, $status);
+                }
+            }
         }
-        if ($code == 404) {
-            throw new NotFoundException("Could not find the image: {$this->url}", $code);
+
+        if ($status >= 500) {
+            throw new APIException($errorMessage, $status);
         }
-        if ($code == 403) {
-            throw new AccessDeniedException("API username was not accepted: {$this->username}", $code);
+        if ($status == 404) {
+            throw new NotFoundException("Could not find the image: {$this->url}", $status);
         }
-        if ($code >= 400) {
-            throw new InvalidArgumentException($status[2], $code);
+        if ($status == 403) {
+            throw new OriginServerException("Origin server denied access to {$this->url}", $status);
+        }
+        if ($status >= 400) {
+            throw new InvalidArgumentException($errorMessage, $status);
         }
 
         return $res;

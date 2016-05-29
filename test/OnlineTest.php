@@ -23,6 +23,14 @@ class OnlineTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
+     * @expectedException ImageOptim\OriginServerException
+     * @expectedExceptionCode 403
+     */
+    public function testGoodKeyUpstream403() {
+        $this->api->imageFromURL('https://im2.io/.htdeny')->dpr('2x')->getBytes();
+    }
+
+    /**
      * @expectedException ImageOptim\NotFoundException
      * @expectedExceptionCode 404
      */

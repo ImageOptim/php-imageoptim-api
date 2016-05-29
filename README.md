@@ -88,7 +88,8 @@ All methods throw on error. You can expect the following exception subclasses:
 
 * `ImageOptim\InvalidArgumentException` means arguments to functions are incorrect and you need to fix your code.
 * `ImageOptim\NetworkException` is thrown when there is problem comunicating with the API. You can retry the request.
-* `ImageOptim\NotFoundException` is thrown when URL given to `imageFromURL()` returns 404. Make sure paths and urlencoding are correct. [More](https://im2.io/api/post#response).
+* `ImageOptim\NotFoundException` is thrown when URL given to `imageFromURL()` returned 404. Make sure paths and urlencoding are correct. [More](https://im2.io/api/post#response).
+* `ImageOptim\OriginServerException` is thrown when URL given to `imageFromURL()` returned 4xx or 5xx error. Make sure your server allows access to the file.
 
 ### Help and info
 

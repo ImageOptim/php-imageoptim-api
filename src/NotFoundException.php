@@ -2,6 +2,6 @@
 
 namespace ImageOptim;
 
-class NotFoundException extends \RuntimeException {
+class NotFoundException extends OriginServerException {
 
 }
