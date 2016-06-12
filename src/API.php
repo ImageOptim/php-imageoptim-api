@@ -13,6 +13,10 @@ class API {
     }
 
     function imageFromURL($url) {
-        return new Request($this->username, $url);
+        return new URLRequest($this->username, $url);
+    }
+
+    function imageFromPath($file) {
+        return new FileRequest($this->username, $file);
     }
 }

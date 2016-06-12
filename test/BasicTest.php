@@ -31,6 +31,14 @@ class BasicTest extends PHPUnit_Framework_TestCase {
 
     /**
      * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage could not be found
+     */
+    public function testNeedsPath() {
+        $this->api->imageFromPath('http://nope/path.png');
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
      * @expectedExceptionMessage Width
      */
     public function testResizeWidth() {

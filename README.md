@@ -40,9 +40,15 @@ file_put_contents("images/photo_optimized.jpg", $imageData);
 
 Creates new instance of the API. You need to give it [your username](https://im2.io/api/username).
 
-#### `imageFromURL($url)` — source image
+#### `imageFromPath($filePath)` — local source image
 
-Creates new request that will read image from the given URL, and then resize and optimize it.
+Creates a new request that will [upload](https://im2.io/api/upload) the image to the API, and then resize and optimize it. The upload method is necessary for optimizing files that are not on the web (e.g. `localhost`, files in `/tmp`).
+
+For images that have a public URLs (e.g. published on a website) it's faster to use the URL method instead:
+
+#### `imageFromURL($url)` — remote source image
+
+Creates a new request that will read the image from the given public URL, and then resize and optimize it.
 
 Please pass full absolute URL to images on your website.
 

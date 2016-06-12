@@ -2,22 +2,15 @@
 
 namespace ImageOptim;
 
-class Request {
+abstract class Request {
     const BASE_URL = 'https://im2.io';
 
-    private $username, $url;
+    private $username;
     private $width, $height, $dpr, $fit, $bgcolor, $quality, $timeout;
 
-    function __construct($username, $url) {
+    function __construct($username) {
         if (!$username) throw new InvalidArgumentException();
-        if (!$url) {
-            throw new InvalidArgumentException("Image URL is required");
-        }
-        if (!preg_match('/^https?:\/\//', $url)) {
-            throw new InvalidArgumentException("The API requires absolute image URL (starting with http:// or https://). Got: $url");
-        }
         $this->username = $username;
-        $this->url = $url;
     }
 
     public function resize($width, $height_or_fit = null, $fit = null) {
@@ -105,7 +98,7 @@ class Request {
         return $this;
     }
 
-    function apiURL() {
+    protected function apiURL() {
         $options = [];
         if ($this->width) {
             $size = $this->width;
@@ -122,20 +115,18 @@ class Request {
         if ($this->timeout) $options[] = 'timeout=' . $this->timeout;
         if ($this->bgcolor) $options[] = 'bgcolor=' . $this->bgcolor;
 
-        return self::BASE_URL . '/' . rawurlencode($this->username) . '/' . implode(',', $options) . '/' . rawurlencode($this->url);
+        return self::BASE_URL . '/' . rawurlencode($this->username) . '/' . implode(',', $options);
     }
 
-    function getBytes() {
+    protected function getBytesWithOptions(array $options, $sourceURL) {
         $url = $this->apiURL();
-        $stream = @fopen($url, 'r', false, stream_context_create([
-            'http' => [
-                'ignore_errors' => true,
-                'method' => 'POST',
-                'header' => "Accept: image/*,application/im2+json\r\n" .
-                            "User-Agent: ImageOptim-php/1.0 PHP/" . phpversion(),
-                'timeout' => max(30, $this->timeout),
-            ],
-        ]));
+        $options['timeout'] = max(30, $this->timeout);
+        $options['ignore_errors'] = true;
+        $options['method'] = 'POST';
+        $options['header'] .= "Accept: image/*,application/im2+json\r\n" .
+                              "User-Agent: ImageOptim-php/1.1 PHP/" . phpversion();
+
+        $stream = @fopen($url, 'r', false, stream_context_create(['http'=>$options]));
 
         if (!$stream) {
             $err = error_get_last();
@@ -190,10 +181,10 @@ class Request {
             throw new APIException($errorMessage, $status);
         }
         if ($status == 404) {
-            throw new NotFoundException("Could not find the image: {$this->url}", $status);
+            throw new NotFoundException("Could not find the image: {$sourceURL}", $status);
         }
         if ($status == 403) {
-            throw new OriginServerException("Origin server denied access to {$this->url}", $status);
+            throw new OriginServerException("Origin server denied access to {$sourceURL}", $status);
         }
         if ($status >= 400) {
             throw new InvalidArgumentException($errorMessage, $status);

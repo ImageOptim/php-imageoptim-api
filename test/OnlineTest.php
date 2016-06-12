@@ -13,6 +13,14 @@ class OnlineTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(100*2, imagesy($gdimg));
     }
 
+    public function testUpload() {
+        $imageData = $this->api->imageFromPath(__dir__ . '/../ImageOptim.png')->resize(32)->getBytes();
+
+        $gdimg = imagecreatefromstring($imageData);
+        $this->assertEquals(32, imagesx($gdimg));
+        $this->assertEquals(32, imagesy($gdimg));
+    }
+
     /**
      * @expectedException ImageOptim\AccessDeniedException
      * @expectedExceptionCode 403
