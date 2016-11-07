@@ -32,6 +32,8 @@ $imageData = $api->imageFromURL('http://example.com/photo.jpg') // read this ima
 file_put_contents("images/photo_optimized.jpg", $imageData);
 ```
 
+There's a longer example at the end of the readme.
+
 ### Methods
 
 #### `API($username)` constructor
@@ -97,6 +99,55 @@ All methods throw on error. You can expect the following exception subclasses:
 * `ImageOptim\NotFoundException` is thrown when URL given to `imageFromURL()` returned 404. Make sure paths and urlencoding are correct. [More](https://im2.io/api/post#response).
 * `ImageOptim\OriginServerException` is thrown when URL given to `imageFromURL()` returned 4xx or 5xx error. Make sure your server allows access to the file.
 
+If you're writing a script that processes a large number of images in one go, don't launch it from a web browser, as it will likely time out. It's best to launch such scripts via CLI (e.g. via SSH).
+
 ### Help and info
 
 See [imageoptim.com/api](https://imageoptim.com/api) for documentation and contact info. I'm happy to help!
+
+### Example
+
+This is a script that optimizes an image. Such script usually would be ran when a new image is uploaded to the server. You don't need to run any PHP code to *serve* optimized images.
+
+The API operates on a single image at a time. When you want to generate multiple image sizes/thumbnails, repeat the whole procedure for each image at each size.
+
+```php
+<?php
+
+// This line is required once to set up Composer
+// If this file can't be found, try changing the path
+// and or run `composer update` in your project's directory
+require "vendor/autoload.php";
+
+$api = new ImageOptim\API("🔶your api username goes here🔶");
+
+// imageFromURL/imageFromPath creates a temporary object used to store
+// settings of the optimization.
+$imageParams = $api->imageFromURL('http://example.com/photo.jpg');
+
+// You set various settings on this object (or none to get the defaults).
+$imageParams->quality('low');
+$imageParams->resize(1024);
+
+// Next, to start the optimizations and get the optimized image, call:
+$imageData = $imageParams->getBytes();
+
+/*
+ the getBytes() call may take a while to run, so it's intended to be
+ called only once per image (e.g. only when a new image is uploaded
+ to your server). If you'd like to "lazily" optimize arbitrary images
+ on-the-fly when  they're requested, there is a better API for that:
+ https://im2.io/api/get
+*/
+
+// Save the image data somewhere on the server, e.g.
+file_put_contents("images/photo_optimized.jpg", $imageData);
+
+// Note that this script only prepares a static image file
+// (in this example in images/photo_optimized.jpg),
+// and does not serve it to the browser. Once the optimized
+// image is saved to disk you should serve it normally
+// as you'd do with any regular image file.
+
+```
+
