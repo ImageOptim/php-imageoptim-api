@@ -43,6 +43,6 @@ class FileRequest extends Request {
                         "Content-MD5: $contentHash\r\n" .
                         "Content-Type: multipart/form-data, boundary=$boundary\r\n",
             'content' => $content,
-        ], $nameEscaped);
+        ], $this->path);
     }
 }
